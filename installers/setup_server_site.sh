@@ -76,29 +76,10 @@ sudo -iu "$SITE_USER" bash -lc "touch '${SITE_ROOT}/shared/.env' && chmod 640 '$
 
 echo "==> Creating SSH deploy key for ${SITE_USER}"
 
-sudo -iu "$SITE_USER" DOMAIN="$DOMAIN" bash <<'EOF'
-set -euo pipefail
-
-install -d -m 700 "$HOME/.ssh"
-
-if [[ -f "$HOME/.ssh/id_ed25519" ]]; then
-  echo "SSH key already exists at $HOME/.ssh/id_ed25519 (skipping)."
-else
-  ssh-keygen -t ed25519 -C "${DOMAIN} deploy key" -f "$HOME/.ssh/id_ed25519" -N ""
-  chmod 600 "$HOME/.ssh/id_ed25519"
-  chmod 644 "$HOME/.ssh/id_ed25519.pub"
-fi
-
-# Add GitHub to known_hosts (avoid prompts)
-ssh-keyscan -H github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
-chmod 644 "$HOME/.ssh/known_hosts"
-
-echo
-echo "----- GitHub Deploy Key (add this to your repo) -----"
-cat "$HOME/.ssh/id_ed25519.pub"
-echo "-----------------------------------------------------"
-echo
-EOF
+curl -fsSL -L "https://github.com/channor/laravel-webserver-guide/raw/refs/heads/main/installers/github_deploy_key.sh" -o /tmp/github_deploy_key.sh
+chmod +x /tmp/github_deploy_key.sh
+sudo -iu "$SITE_USER" DOMAIN="$DOMAIN" bash /tmp/github_deploy_key.sh
+rm -f /tmp/github_deploy_key.sh
 
 echo "==> Add the above key in GitHub as a Deploy Key (read-only is fine)."
 read -r -p "Press Enter when you've added the deploy key..."
