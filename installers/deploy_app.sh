@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
+
+######################################
 # installers/deploy_app.sh
+#
+# First time deploying the app
 
 set -euo pipefail
 
@@ -26,7 +30,7 @@ CONFIG="/home/${SITE_USER}/.laravel-site.env"
 # shellcheck disable=SC1090
 source "$CONFIG"
 
-echo "==> First release for ${DOMAIN}"
+echo "==> First deploy for ${DOMAIN}"
 RELEASE="$(date +%Y%m%d_%H%M%S)"
 RELEASE_DIR="${SITE_ROOT}/releases/${RELEASE}"
 
@@ -102,4 +106,3 @@ systemctl reload "$PHP_FPM_SERVICE"
 echo
 echo "==> Done."
 echo "Current points to: ${SITE_ROOT}/current"
-echo "Next: sudo bash installers/setup_domain_and_https.sh"
