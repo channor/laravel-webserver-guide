@@ -75,8 +75,10 @@ echo "==> Creating shared .env placeholder"
 sudo -iu "$SITE_USER" bash -lc "touch '${SITE_ROOT}/shared/.env' && chmod 640 '${SITE_ROOT}/shared/.env'"
 
 echo "==> Creating SSH deploy key for ${SITE_USER}"
-sudo -iu "$SITE_USER" env DOMAIN="$DOMAIN" bash -lc '
+
+sudo -iu "$SITE_USER" DOMAIN="$DOMAIN" bash <<'EOF'
 set -euo pipefail
+
 install -d -m 700 "$HOME/.ssh"
 
 if [[ -f "$HOME/.ssh/id_ed25519" ]]; then
@@ -96,7 +98,7 @@ echo "----- GitHub Deploy Key (add this to your repo) -----"
 cat "$HOME/.ssh/id_ed25519.pub"
 echo "-----------------------------------------------------"
 echo
-'
+EOF
 
 echo "==> Add the above key in GitHub as a Deploy Key (read-only is fine)."
 read -r -p "Press Enter when you've added the deploy key..."
