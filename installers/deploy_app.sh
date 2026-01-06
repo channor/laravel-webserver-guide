@@ -41,7 +41,6 @@ mkdir -p '$RELEASE_DIR'
 git clone --depth=1 --branch '$BRANCH' '$REPO_SSH' '$RELEASE_DIR'
 "
 
-
 echo "==> Linking shared .env + storage"
 sudo -iu "$SITE_USER" bash -lc "
 set -euo pipefail
