@@ -202,3 +202,56 @@ curl -fsSL -L "https://github.com/channor/laravel-webserver-guide/raw/refs/heads
 sudo bash /tmp/composer.sh
 rm -f /tmp/composer.sh
 ```
+
+### 8. Install MySQL
+
+```bash
+sudo apt install -y mysql-server
+sudo systemctl enable --now mysql
+sudo systemctl status mysql --no-pager
+```
+
+> Use `sudo mysql` for root privileges
+
+### 9. Install Supervisor
+
+```bash
+sudo apt install -y supervisor
+sudo systemctl enable --now supervisor
+```
+
+### 10. Install Let's Encrypt
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+```
+
+### 11. Install ClamAV
+
+```bash
+sudo apt install -y clamav clamav-daemon clamav-freshclam
+sudo systemctl stop clamav-daemon
+sudo systemctl stop clamav-freshclam
+sudo freshclam
+sudo systemctl enable --now clamav-freshclam
+sudo systemctl enable --now clamav-daemon
+sudo systemctl status clamav-freshclam clamav-daemon --no-pager
+sudo clamscan --version
+```
+
+## Set up and configure a site / Laravel app
+
+The server is now ready to host Laravel applications. The next steps are to create and deploy a site, which typically involves:
+
+- Create a dedicated deploy user (no sudo)
+- Create the directory structure for the site
+- Create an SSH key (deploy key) for GitHub and add it to the repository
+- Clone the Laravel repository
+- Install and configure the app (env, permissions, storage, cache)
+- Configure the database and run migrations
+- Set up Laravel Scheduler (cron) and queues (Supervisor)
+- Point DNS to the server
+- Issue a TLS certificate (Certbot) and ensure renewal is enabled
+- Configure NGINX server block for the site
+
+For the next steps, see [Create a site](docs/CREATE_SITE.md).
