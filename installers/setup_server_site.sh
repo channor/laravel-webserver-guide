@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
-# installers/setup_server_site.sh
-# Run: sudo bash installers/setup_server_site.sh
+#
+
+#################################
+# script: installers/setup_server_site.sh
+#
+# Setup
+# - Server user dedicated for one site/app
+# - Create directory structure and set permissions
+# - Create .env placeholder
+# - Create SSH deploy key
+# - Setup a mysql database
+# - Create a database owner user and a random strong password (for migration)
+# - Create a database user for the app
 
 set -euo pipefail
 
@@ -20,6 +31,8 @@ require_cmd adduser
 require_cmd usermod
 require_cmd ssh-keygen
 require_cmd ssh-keyscan
+require_cmd mysql
+require_cmd openssl
 
 echo "==> Site setup (this will create user + dirs + deploy key, then store config)."
 echo
@@ -77,7 +90,6 @@ sudo -iu "$SITE_USER" bash -lc "touch '${SITE_ROOT}/shared/.env' && chmod 640 '$
 echo "==> Creating SSH deploy key for ${SITE_USER}"
 
 curl -fsSL -L "https://github.com/channor/laravel-webserver-guide/raw/refs/heads/main/installers/github_deploy_key.sh" -o /tmp/github_deploy_key.sh
-chmod +x /tmp/github_deploy_key.sh
 sudo -iu "$SITE_USER" DOMAIN="$DOMAIN" bash /tmp/github_deploy_key.sh
 rm -f /tmp/github_deploy_key.sh
 
@@ -106,7 +118,38 @@ install -m 600 "$tmp" "$CONFIG_PATH"
 chown "$SITE_USER:$SITE_USER" "$CONFIG_PATH"
 rm -f "$tmp"
 
+echo "==> Creating database"
+
+curl -fsSL -L "https://github.com/channor/laravel-webserver-guide/raw/refs/heads/main/installers/create_mysql_database.sh" -o /tmp/create_mysql_database.sh
+
+read -r -p "DB name (Enter for auto): " DB_NAME
+if [[ -z "${DB_NAME}" ]]; then
+  RAND_SUFFIX="$(openssl rand -base64 9 | tr -dc 'a-z0-9' | head -c 8)"
+  DB_NAME="${SITE_USER}_${RAND_SUFFIX}"
+  echo "Using generated DB name: $DB_NAME"
+fi
+
+sudo SITE_USER="$SITE_USER" DB_NAME="$DB_NAME" bash /tmp/create_mysql_database.sh
+rm -f /tmp/create_mysql_database.sh
+
+echo "==> Creating database users"
+curl -fsSL -L "https://github.com/channor/laravel-webserver-guide/raw/refs/heads/main/installers/create_mysql_db_user.sh" -o /tmp/create_mysql_db_user.sh
+
+echo "==> Creating database owner user"
+sudo SITE_USER="$SITE_USER" DB_NAME="$DB_NAME" TYPE="OWNER" bash /tmp/create_mysql_db_user.sh
+
+echo "==> Creating database app user"
+sudo SITE_USER="$SITE_USER" DB_NAME="$DB_NAME" TYPE="APP" bash /tmp/create_mysql_db_user.sh
+
+rm -f /tmp/create_mysql_db_user.sh
+
+# Append DB_NAME to config (no creds)
+echo "DB_NAME=$(printf %q "$DB_NAME")" >> "$CONFIG_PATH"
+chown "$SITE_USER:$SITE_USER" "$CONFIG_PATH"
+chmod 600 "$CONFIG_PATH"
+
+echo "Database: $DB_NAME"
+
 echo
 echo "==> Done."
 echo "Config stored at: ${CONFIG_PATH}"
-echo "Next: sudo bash installers/first_release.sh"

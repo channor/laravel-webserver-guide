@@ -14,11 +14,21 @@ This guide will
 
 ## 1. Setup user + directories + ssh
 
-Run the [Setup Server Site script](installers/setup_server_site.sh)
+Run the [Setup Server Site script](installers/setup_server_site.sh) and enter
+
+* domain
+* user (new user for the server and only user for this site/app)
+* GitHub Repo SSH-url
+* Email for Let's Encrypt (optional)
 
 ```bash
 curl -fsSL -L "https://github.com/channor/laravel-webserver-guide/raw/refs/heads/main/installers/setup_server_site.sh" -o /tmp/setup_server_site.sh
 sudo bash /tmp/setup_server_site.sh
 rm -f /tmp/setup_server_site.sh
 ```
+
+After this, a user is added, GitHub SSH-key for the user is created, directory structure is created and .env placeholder.  
+
+## 2. Deploy first release
+
 
