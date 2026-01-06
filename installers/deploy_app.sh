@@ -35,11 +35,11 @@ RELEASE="$(date +%Y%m%d_%H%M%S)"
 RELEASE_DIR="${SITE_ROOT}/releases/${RELEASE}"
 
 echo "==> Cloning (${BRANCH}) into ${RELEASE_DIR}"
-sudo -iu "$SITE_USER" bash -lc "
+sudo -iu "$SITE_USER" bash <<EOF
 set -euo pipefail
-mkdir -p '$RELEASE_DIR'
-git clone --depth=1 --branch '$BRANCH' '$REPO_SSH' '$RELEASE_DIR'
-"
+mkdir -p "$RELEASE_DIR"
+git clone --depth=1 --branch "$BRANCH" "$REPO_SSH" "$RELEASE_DIR"
+EOF
 
 echo "==> Linking shared .env + storage"
 sudo -iu "$SITE_USER" bash -lc "
