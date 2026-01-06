@@ -36,7 +36,7 @@ RELEASE_DIR="${SITE_ROOT}/releases/${RELEASE}"
 
 echo "==> Cloning (${BRANCH}) into ${RELEASE_DIR}"
 sudo -iu "$SITE_USER" bash <<EOF
-set -euo pipefail
+set -e pipefail
 mkdir -p "$RELEASE_DIR"
 git clone --depth=1 --branch "$BRANCH" "$REPO_SSH" "$RELEASE_DIR"
 EOF
